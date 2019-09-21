@@ -113,6 +113,10 @@ inline CSV<T> readCSV(const std::string & filename, std::function<T(const std::s
 				buf << c;
 			}
 		}
+		std::string tail = buf.str();
+		if (tail.size() > 0) {
+			row.AddElement(func(buf.str()));
+		}
 		if (width == 0) {
 			width = row.Count();
 		} else if (width != row.Count()) {
