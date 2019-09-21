@@ -13,6 +13,7 @@
 #include "SpriteComponent.h"
 #include "Ship.h"
 #include "BGSpriteComponent.h"
+#include "TileMapComponent.h"
 
 Game::Game()
 :mWindow(nullptr)
@@ -179,6 +180,25 @@ void Game::LoadData()
 	};
 	bg->SetBGTextures(bgtexs);
 	bg->SetScrollSpeed(-200.0f);
+	// タイルマップ読み込み
+	CSV<int> layer1 = readCSV<int>("Assets/MapLayer1.csv", [](const std::string& e) -> int {
+		return std::stoi(e);
+	});
+	CSV<int> layer2 = readCSV<int>("Assets/MapLayer2.csv", [](const std::string& e) -> int {
+		return std::stoi(e);
+	});
+	CSV<int> layer3 = readCSV<int>("Assets/MapLayer3.csv", [](const std::string& e) -> int {
+		return std::stoi(e);
+	});
+	TileMapTexture tilemapTexture(24,8);
+	tilemapTexture.AddLayer(layer3);
+	tilemapTexture.AddLayer(layer2);
+	tilemapTexture.AddLayer(layer1);
+	temp = new Actor(this);
+	TileMapComponent* tilemapComp = new TileMapComponent(temp, tilemapTexture, 99);
+	tilemapComp->SetTexture(GetTexture("Assets/Tiles.png"));
+
+
 }
 
 void Game::UnloadData()
