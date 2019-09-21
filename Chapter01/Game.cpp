@@ -8,7 +8,10 @@
 
 #include "Game.h"
 
-const int thickness = 15;
+const float ballW = 30.0f;
+const float ballH = 30.0f;
+const float wallH = 15.0f;
+const float paddleW = 25.0f;
 const float paddleH = 100.0f;
 
 Game::Game()
@@ -137,13 +140,13 @@ void Game::UpdateGame()
 	{
 		mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;
 		// Make sure paddle doesn't move off screen!
-		if (mPaddlePos.y < (paddleH/2.0f + thickness))
+		if (mPaddlePos.y < (paddleH/2.0f + wallH))
 		{
-			mPaddlePos.y = paddleH/2.0f + thickness;
+			mPaddlePos.y = paddleH/2.0f + wallH;
 		}
-		else if (mPaddlePos.y > (768.0f - paddleH/2.0f - thickness))
+		else if (mPaddlePos.y > (768.0f - paddleH/2.0f - wallH))
 		{
-			mPaddlePos.y = 768.0f - paddleH/2.0f - thickness;
+			mPaddlePos.y = 768.0f - paddleH/2.0f - wallH;
 		}
 	}
 	
@@ -160,7 +163,7 @@ void Game::UpdateGame()
 		// Our y-difference is small enough
 		diff <= paddleH / 2.0f &&
 		// We are in the correct x-position
-		mBallPos.x <= 25.0f && mBallPos.x >= 20.0f &&
+		mBallPos.x - (ballW / 2.0f) <= mPaddlePos.x + paddleW &&
 		// The ball is moving to the left
 		mBallVel.x < 0.0f)
 	{
@@ -174,20 +177,20 @@ void Game::UpdateGame()
 	}
 	// Did the ball collide with the right wall?
 	// ボールが右に加速していて、ボールが右の壁に当たった
-	else if (mBallPos.x >= (1024.0f - thickness) && mBallVel.x > 0.0f)
+	else if (mBallPos.x + ballW >= 1024.0f && mBallVel.x > 0.0f)
 	{
 		mBallVel.x *= -1.0f;
 	}
 	
 	// Did the ball collide with the top wall?
 	// ボールが上に加速していて、ボールが上の壁に当たった
-	if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
+	if (mBallPos.y - (ballH / 2) <= wallH && mBallVel.y < 0.0f)
 	{
 		mBallVel.y *= -1;
 	}
 	// Did the ball collide with the bottom wall?
 	// ボールが下に加速していて、ボールが下の壁に当たった
-	else if (mBallPos.y >= (768 - thickness) &&
+	else if (mBallPos.y + ballH >= 768 &&
 		mBallVel.y > 0.0f)
 	{
 		mBallVel.y *= -1;
@@ -220,21 +223,21 @@ void Game::GenerateOutput()
 	
 	// Draw top wall
 	SDL_Rect wall{
-		0,			// Top left x
-		0,			// Top left y
-		1024,		// Width
-		thickness	// Height
+		0,						// Top left x
+		0,						// Top left y
+		1024,					// Width
+		static_cast<int>(wallH)	// Height
 	};
 	SDL_RenderFillRect(mRenderer, &wall);
 	
 	// Draw bottom wall
-	wall.y = 768 - thickness;
+	wall.y = 768 - static_cast<int>(wallH);
 	SDL_RenderFillRect(mRenderer, &wall);
 	
 	// Draw right wall
-	wall.x = 1024 - thickness;
+	wall.x = 1024 - static_cast<int>(wallH);
 	wall.y = 0;
-	wall.w = thickness;
+	wall.w = wallH;
 	wall.h = 1024;
 	SDL_RenderFillRect(mRenderer, &wall);
 	
@@ -242,17 +245,17 @@ void Game::GenerateOutput()
 	SDL_Rect paddle{
 		static_cast<int>(mPaddlePos.x),
 		static_cast<int>(mPaddlePos.y - paddleH/2),
-		thickness,
+		static_cast<int>(paddleW),
 		static_cast<int>(paddleH)
 	};
 	SDL_RenderFillRect(mRenderer, &paddle);
 	
 	// Draw ball
 	SDL_Rect ball{	
-		static_cast<int>(mBallPos.x - thickness/2),
-		static_cast<int>(mBallPos.y - thickness/2),
-		thickness,
-		thickness
+		static_cast<int>(mBallPos.x - ballW /2),
+		static_cast<int>(mBallPos.y - ballH/2),
+		static_cast<int>(ballW),
+		static_cast<int>(ballH)
 	};
 	SDL_RenderFillRect(mRenderer, &ball);
 	
