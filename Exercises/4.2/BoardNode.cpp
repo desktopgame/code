@@ -20,7 +20,7 @@ float AlphaBetaMax(const BoardState * node, int depth, float alpha, float beta) 
 		return node->GetScore();
 	}
 	float maxValue = -std::numeric_limits<float>::infinity();
-	for (const BoardState* child : node->GetPossibleMoves(BoardState::SquareState::Red)) {
+	for (const BoardState* child : node->GetPossibleMoves(BoardState::SquareState::Yellow)) {
 		maxValue = std::max(maxValue, AlphaBetaMin(child, depth - 1, alpha, beta));
 		if (maxValue >= beta) {
 			return maxValue;
@@ -35,7 +35,7 @@ float AlphaBetaMin(const BoardState * node, int depth, float alpha, float beta) 
 		return node->GetScore();
 	}
 	float minValue = std::numeric_limits<float>::infinity();
-	for (const BoardState* child : node->GetPossibleMoves(BoardState::SquareState::Yellow)) {
+	for (const BoardState* child : node->GetPossibleMoves(BoardState::SquareState::Red)) {
 		minValue = std::min(minValue, AlphaBetaMax(child, depth - 1, alpha, beta));
 		if (minValue <= alpha) {
 			return minValue;
