@@ -15,6 +15,19 @@ public:
 
 	void UpdateActor(float deltaTime) override;
 	void ActorInput(const uint8_t* keyState) override;
+
+	void SetRespawnPosition(const Vector2 respawnPosition);
+	Vector2 GetRespawnPosition() const;
+
+	void SetRespawnRotation(const float rotation);
+	float GetRespawnRotation() const;
 private:
+	float mElapsed;
 	float mLaserCooldown;
+	bool mIsDead;
+	float mDeadTime;
+	Vector2 mRespawnPosition;
+	float mRespawnRotation;
+	class SpriteComponent* mSprite;
+	class CircleComponent* mCircle;
 };

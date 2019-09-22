@@ -164,6 +164,8 @@ void Game::LoadData()
 	mShip = new Ship(this);
 	mShip->SetPosition(Vector2(512.0f, 384.0f));
 	mShip->SetRotation(Math::PiOver2);
+	mShip->SetRespawnPosition(Vector2(512.0f, 384.0f));
+	mShip->SetRespawnRotation(Math::PiOver2);
 
 	// Create asteroids
 	const int numAsteroids = 20;
