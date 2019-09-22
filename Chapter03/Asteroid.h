@@ -13,8 +13,10 @@ class Asteroid : public Actor
 public:
 	Asteroid(class Game* game);
 	~Asteroid();
+	void UpdateActor(float deltaTime);
 	
 	class CircleComponent* GetCircle() { return mCircle; }
 private:
+	class MoveComponent* mMove;
 	class CircleComponent* mCircle;
 };

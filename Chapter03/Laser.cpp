@@ -22,8 +22,9 @@ Laser::Laser(Game* game)
 	sc->SetTexture(game->GetTexture("Assets/Laser.png"));
 
 	// Create a move component, and set a forward speed
-	MoveComponent* mc = new MoveComponent(this);
-	mc->SetForwardSpeed(800.0f);
+	this->mMove = new MoveComponent(this);
+	mMove->SetForwardSpeed(800.0f);
+	mMove->SetMass(0.02f);
 
 	// Create a circle component (for collision)
 	mCircle = new CircleComponent(this);
@@ -40,6 +41,7 @@ void Laser::UpdateActor(float deltaTime)
 	}
 	else
 	{
+		mMove->AddForce(GetForward() * mMove->GetForwardSpeed());
 		// Do we intersect with an asteroid?
 		for (auto ast : GetGame()->GetAsteroids())
 		{
