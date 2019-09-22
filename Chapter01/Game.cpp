@@ -170,38 +170,27 @@ void Game::UpdateGame()
 		mBallVel.x *= -1.0f;
 	}
 	// Did the ball go off the screen? (if so, end game)
-	// 左の壁に当たった(プレイヤーの負け)
 	else if (mBallPos.x <= 0.0f)
 	{
 		mIsRunning = false;
 	}
 	// Did the ball collide with the right wall?
-	// ボールが右に加速していて、ボールが右の壁に当たった
 	else if (mBallPos.x + ballW >= 1024.0f && mBallVel.x > 0.0f)
 	{
 		mBallVel.x *= -1.0f;
 	}
 	
 	// Did the ball collide with the top wall?
-	// ボールが上に加速していて、ボールが上の壁に当たった
 	if (mBallPos.y - (ballH / 2) <= wallH && mBallVel.y < 0.0f)
 	{
 		mBallVel.y *= -1;
 	}
 	// Did the ball collide with the bottom wall?
-	// ボールが下に加速していて、ボールが下の壁に当たった
 	else if (mBallPos.y + ballH >= 768 &&
 		mBallVel.y > 0.0f)
 	{
 		mBallVel.y *= -1;
 	}
-	/*
-	mBollPos.y ボールの上
-	-y 上
-	+y 下
-	-x 左
-	+x 右
-	*/
 }
 
 void Game::GenerateOutput()
