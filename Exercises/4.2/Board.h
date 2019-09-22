@@ -20,6 +20,7 @@ public:
 
 	SquareState mBoard[6][7];
 protected:
+	static float MatchesToScore(int matches);
 	bool IsFull() const;
 	int GetFourInARow() const;
 	float CalculateHeuristic() const;

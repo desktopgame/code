@@ -8,6 +8,7 @@
 
 #include "Board.h"
 #include "Random.h"
+#include "BoardNode.h"
 
 BoardState::BoardState()
 {
@@ -75,6 +76,17 @@ float BoardState::GetScore() const
 	}
 
 	return CalculateHeuristic();
+}
+
+float BoardState::MatchesToScore(int matches) {
+	if (matches <= 1) {
+		return 0;
+	} else if (matches == 2) {
+		return 0.01f;
+	} else if (matches == 3) {
+		return 0.02f;
+	}
+	throw std::logic_error("invalid range");
 }
 
 bool BoardState::IsFull() const
@@ -186,8 +198,53 @@ int BoardState::GetFourInARow() const
 
 float BoardState::CalculateHeuristic() const
 {
+	float score = 0.0f;
 	// TODO: You could change this to calculate an actual heuristic
-	return 0.0f;
+	for (int i = 0; i < 6; i++) {
+		SquareState old = SquareState::Empty;
+		int matches = 0;
+		for (int j = 0; j < 7; j++) {
+			SquareState state = mBoard[i][j];
+			if (j == 0) {
+				old = state;
+				matches = 1;
+			} else if (old == state) {
+				matches++;
+			} else if (old != state) {
+				if (old == SquareState::Red) {
+					score += MatchesToScore(matches);
+				}
+				old = state;
+				matches = 0;
+			}
+		}
+		if (old == SquareState::Red) {
+			score += MatchesToScore(matches);
+		}
+	}
+	for (int j = 0; j < 7; j++) {
+		SquareState old = SquareState::Empty;
+		int matches = 0;
+		for (int i = 0; i < 6; i++) {
+			SquareState state = mBoard[i][j];
+			if (i == 0) {
+				old = state;
+				matches = 1;
+			} else if (old == state) {
+				matches++;
+			} else if (old != state) {
+				if (old == SquareState::Red) {
+					score += MatchesToScore(matches);
+				}
+				old = state;
+				matches = 0;
+			}
+		}
+		if (old == SquareState::Red) {
+			score += MatchesToScore(matches);
+		}
+	}
+	return score;
 }
 
 bool TryPlayerMove(BoardState* state, int column)
@@ -209,15 +266,9 @@ bool TryPlayerMove(BoardState* state, int column)
 void CPUMove(BoardState* state)
 {
 	// For now, this just randomly picks one of the possible moves
-	std::vector<BoardState*> moves = state->GetPossibleMoves(BoardState::Red);
+	BoardState* stat = const_cast<BoardState*>(AlphaBetaDecide(state, 8));
 
-	int index = Random::GetIntRange(0, moves.size() - 1);
+	*state = *stat;
 
-	*state = *moves[index];
-
-	// Clear up memory from possible moves
-	for (auto state : moves)
-	{
-		delete state;
-	}
+	delete stat;
 }
