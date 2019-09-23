@@ -412,6 +412,25 @@ public:
 	static const Vector3 NegInfinity;
 };
 
+class Vector4 {
+public:
+	Vector4() : x(0), y(0), z(0), w(1){ }
+	Vector4(float x, float y, float z) : x(x), y(y), z(z), w(1) { }
+	Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+	// Lerp from A to B by f
+	static Vector4 Lerp(const Vector4& a, const Vector4& b, float f) {
+		float nx = Math::Lerp(a.x, b.x, f);
+		float ny = Math::Lerp(a.y, b.y, f);
+		float nz = Math::Lerp(a.z, b.z, f);
+		float nw = Math::Lerp(a.w, b.w, f);
+		return Vector4(nx, ny, nz, nw);
+	}
+	float x;
+	float y;
+	float z;
+	float w;
+};
+
 // 3x3 Matrix
 class Matrix3
 {

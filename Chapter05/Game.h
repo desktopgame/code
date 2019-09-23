@@ -58,6 +58,11 @@ private:
 	// Sprite vertex array
 	class VertexArray* mSpriteVerts;
 
+	Vector4 mStartColor;
+	Vector4 mProgressColor;
+	Vector4 mNextColor;
+	float mColorTime;
+
 	SDL_Window* mWindow;
 	SDL_GLContext mContext;
 	Uint32 mTicksCount;

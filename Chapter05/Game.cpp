@@ -24,6 +24,9 @@ Game::Game()
 ,mSpriteShader(nullptr)
 ,mIsRunning(true)
 ,mUpdatingActors(false)
+,mStartColor(0.86f, 0.86f, 0.86f, 1.0f)
+,mNextColor(1, 0, 0, 1.0f)
+,mColorTime(0.0f)
 {
 	
 }
@@ -141,7 +144,21 @@ void Game::UpdateGame()
 	{
 		deltaTime = 0.05f;
 	}
+	const float COLOR_LENGTH = 3.0f;
 	mTicksCount = SDL_GetTicks();
+	this->mColorTime += deltaTime;
+	if (mColorTime >= COLOR_LENGTH) {
+		this->mStartColor = this->mProgressColor = mNextColor;
+		this->mColorTime = 0;
+		this->mNextColor = Vector4(
+			Random::GetFloat(),
+			Random::GetFloat(),
+			Random::GetFloat(),
+			Random::GetFloat()
+		);
+	} else {
+		this->mProgressColor = Vector4::Lerp(mStartColor, mNextColor, mColorTime / COLOR_LENGTH);
+	}
 
 	// Update all actors
 	mUpdatingActors = true;
@@ -179,7 +196,7 @@ void Game::UpdateGame()
 void Game::GenerateOutput()
 {
 	// Set the clear color to grey
-	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
+	glClearColor(mProgressColor.x, mProgressColor.y, mProgressColor.z, mProgressColor.w);
 	// Clear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
 	
