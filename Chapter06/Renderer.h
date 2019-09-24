@@ -53,6 +53,7 @@ public:
 	float GetScreenHeight() const { return mScreenHeight; }
 private:
 	bool LoadShaders();
+	class Shader* LoadShader(const std::string& name, const std::string& vertFile, const std::string& fragFile);
 	void CreateSpriteVerts();
 	void SetLightUniforms(class Shader* shader);
 
@@ -76,7 +77,7 @@ private:
 	class VertexArray* mSpriteVerts;
 
 	// Mesh shader
-	class Shader* mMeshShader;
+	std::unordered_map<std::string, class Shader*> mMeshShaderMap;
 
 	// View/projection for 3D shaders
 	Matrix4 mView;

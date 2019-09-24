@@ -19,7 +19,7 @@
 Renderer::Renderer(Game* game)
 	:mGame(game)
 	,mSpriteShader(nullptr)
-	,mMeshShader(nullptr)
+	,mMeshShaderMap()
 {
 }
 
@@ -90,8 +90,10 @@ void Renderer::Shutdown()
 	delete mSpriteVerts;
 	mSpriteShader->Unload();
 	delete mSpriteShader;
-	mMeshShader->Unload();
-	delete mMeshShader;
+	for (auto kv : mMeshShaderMap) {
+		kv.second->Unload();
+	}
+	mMeshShaderMap.clear();
 	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);
 }
@@ -126,15 +128,32 @@ void Renderer::Draw()
 	// Enable depth buffering/disable alpha blend
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	// Set the mesh shader active
-	mMeshShader->SetActive();
-	// Update view-projection matrix
-	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
-	// Update lighting uniforms
-	SetLightUniforms(mMeshShader);
+	std::unordered_map<std::string, std::vector<MeshComponent*> > cache;
 	for (auto mc : mMeshComps)
 	{
-		mc->Draw(mMeshShader);
+		Mesh* msh = mc->GetMesh();
+		std::string mshName = msh->GetShaderName();
+		if (!cache.count(mshName)) {
+			std::vector<MeshComponent*> v;
+			v.emplace_back(mc);
+			cache[mshName] = v;
+		} else {
+			std::vector<MeshComponent*>& v = cache.at(mshName);
+			v.emplace_back(mc);
+		}
+	}
+	for (auto kv : cache) {
+		auto sh = mMeshShaderMap[kv.first];
+		auto comps = kv.second;
+		// Set the mesh shader active
+		sh->SetActive();
+		// Update view-projection matrix
+		sh->SetMatrixUniform("uViewProj", mView * mProjection);
+		// Update lighting uniforms
+		SetLightUniforms(sh);
+		for (auto comp : comps) {
+			comp->Draw(sh);
+		}
 	}
 
 	// Draw all sprite components
@@ -256,10 +275,21 @@ bool Renderer::LoadShaders()
 	Matrix4 viewProj = Matrix4::CreateSimpleViewProj(mScreenWidth, mScreenHeight);
 	mSpriteShader->SetMatrixUniform("uViewProj", viewProj);
 
+	// Create phong mesh shader
+	Shader* mMeshShader = nullptr;
+	if ((mMeshShader = LoadShader("PhongMesh", "Shaders/Phong.vert", "Shaders/Phong.frag")) == nullptr) {
+		return false;
+	}
+
+	mMeshShader->SetActive();
+	// Set the view-projection matrix
+	mView = Matrix4::CreateLookAt(Vector3::Zero, Vector3::UnitX, Vector3::UnitZ);
+	mProjection = Matrix4::CreatePerspectiveFOV(Math::ToRadians(70.0f),
+		mScreenWidth, mScreenHeight, 25.0f, 10000.0f);
+	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
+
 	// Create basic mesh shader
-	mMeshShader = new Shader();
-	if (!mMeshShader->Load("Shaders/Phong.vert", "Shaders/Phong.frag"))
-	{
+	if ((mMeshShader = LoadShader("BasicMesh", "Shaders/BasicMesh.vert", "Shaders/BasicMesh.frag")) == nullptr) {
 		return false;
 	}
 
@@ -270,6 +300,17 @@ bool Renderer::LoadShaders()
 		mScreenWidth, mScreenHeight, 25.0f, 10000.0f);
 	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
 	return true;
+}
+
+Shader* Renderer::LoadShader(const std::string & name, const std::string & vertFile, const std::string & fragFile) {
+	Shader* sh = new Shader();
+	if (sh->Load(vertFile, fragFile)) {
+		mMeshShaderMap[name] = sh;
+		return sh;
+	}
+	sh->Unload();
+	delete sh;
+	return nullptr;
 }
 
 void Renderer::CreateSpriteVerts()
