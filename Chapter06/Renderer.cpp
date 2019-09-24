@@ -152,6 +152,10 @@ void Renderer::Draw()
 		// Update lighting uniforms
 		SetLightUniforms(sh);
 		for (auto comp : comps) {
+			if (kv.first == "PhongMesh2") {
+				sh->SetIntUniform("uMaterial.mDiffuse", 0);
+				sh->SetIntUniform("uMaterial.mSpecular",0);
+			}
 			comp->Draw(sh);
 		}
 	}
@@ -287,6 +291,69 @@ bool Renderer::LoadShaders()
 	mProjection = Matrix4::CreatePerspectiveFOV(Math::ToRadians(70.0f),
 		mScreenWidth, mScreenHeight, 25.0f, 10000.0f);
 	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
+
+	// Create phongML mesh shader
+	if ((mMeshShader = LoadShader("PhongMesh2", "Shaders/PhongML.vert", "Shaders/PhongML.frag")) == nullptr) {
+		return false;
+	}
+
+	mMeshShader->SetActive();
+	// Set the view-projection matrix
+	mView = Matrix4::CreateLookAt(Vector3::Zero, Vector3::UnitX, Vector3::UnitZ);
+	mProjection = Matrix4::CreatePerspectiveFOV(Math::ToRadians(70.0f),
+		mScreenWidth, mScreenHeight, 25.0f, 10000.0f);
+	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
+	const char* positionFmt = "pointLights[%d].mPosition";
+	const char* constantFmt = "pointLights[%d].mConstant";
+	const char* linearFmt = "pointLights[%d].mLinear";
+	const char* quadraticFmt = "pointLights[%d].mQuadratic";
+	const char* ambientFmt = "pointLights[%d].mAmbient";
+	const char* diffuseFmt = "pointLights[%d].mDiffuse";
+	const char* specularFmt = "pointLights[%d].mSpecular";
+	const char* materialDiffuseFmt = "uMaterial.mDiffuse";
+	const char* materialSpecularFmt = "uMaterial.mSpecular";
+	const char* materialShininessFmt = "uMaterial.mShininess";
+	mMeshShader->SetIntUniform(materialDiffuseFmt, 0);
+	mMeshShader->SetIntUniform(materialSpecularFmt, 1);
+	mMeshShader->SetFloatUniform(materialShininessFmt, 32);
+	const float UNIT = 200.0f;
+	Vector3 posTable[4] = {
+		Vector3(200.0f, -75.0f, 0.0f + UNIT),
+		Vector3(200.0f, -75.0f, 0.0f - UNIT),
+		Vector3(200.0f + UNIT, -75.0f, 0.0f + UNIT),
+		Vector3(200.0f - UNIT, -75.0f, 0.0f - UNIT),
+	};
+	Vector3 colorTable[4] = {
+		Vector3(1, 0, 0),
+		Vector3(0, 1, 0),
+		Vector3(0, 0, 1),
+		Vector3(1, 0, 0),
+	};
+	for (int i = 0; i < 4; i++) {
+		char buf[512];
+		std::memset(buf, '\0', 512);
+
+		std::sprintf(buf, positionFmt, i);
+		mMeshShader->SetVectorUniform(buf, posTable[i]);
+
+		std::sprintf(buf, constantFmt, i);
+		mMeshShader->SetFloatUniform(buf, 1.0f);
+
+		std::sprintf(buf, linearFmt, i);
+		mMeshShader->SetFloatUniform(buf, 1.0f);
+
+		std::sprintf(buf, quadraticFmt, i);
+		mMeshShader->SetFloatUniform(buf, 1.0f);
+
+		std::sprintf(buf, ambientFmt, i);
+		mMeshShader->SetVectorUniform(buf, colorTable[i]);
+
+		std::sprintf(buf, diffuseFmt, i);
+		mMeshShader->SetVectorUniform(buf, colorTable[i]);
+
+		std::sprintf(buf, specularFmt, i);
+		mMeshShader->SetVectorUniform(buf, colorTable[i]);
+	}
 
 	// Create basic mesh shader
 	if ((mMeshShader = LoadShader("BasicMesh", "Shaders/BasicMesh.vert", "Shaders/BasicMesh.frag")) == nullptr) {
