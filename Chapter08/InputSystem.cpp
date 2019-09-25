@@ -185,7 +185,7 @@ void InputState::AddBinding(const std::string & oneline)
 	std::string name = words[0];
 	std::string type = words[1];
 	if (type == "Key") {
-		PutBinding(name, new KeyDetector((SDL_Scancode)words[2].at(0)));
+		PutBinding(name, new KeyDetector((SDL_Scancode)std::stoi(words[2])));
 	}
 	else if (type == "Mouse") {
 		if (words[2] == "Left") {
