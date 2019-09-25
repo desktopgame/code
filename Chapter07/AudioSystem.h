@@ -51,6 +51,8 @@ public:
 	bool GetBusPaused(const std::string& name) const;
 	void SetBusVolume(const std::string& name, float volume);
 	void SetBusPaused(const std::string& name, bool pause);
+
+	void Set3DSettings(float dopplerScale, float meter, float rollOfScale);
 protected:
 	friend class SoundEvent;
 	FMOD::Studio::EventInstance* GetEventInstance(unsigned int id);

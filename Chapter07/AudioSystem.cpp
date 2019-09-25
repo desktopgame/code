@@ -336,6 +336,11 @@ void AudioSystem::SetBusPaused(const std::string & name, bool pause)
 	}
 }
 
+void AudioSystem::Set3DSettings(float dopplerScale, float meter, float rollOfScale)
+{
+	mLowLevelSystem->set3DSettings(dopplerScale, meter, rollOfScale);
+}
+
 FMOD::Studio::EventInstance* AudioSystem::GetEventInstance(unsigned int id)
 {
 	FMOD::Studio::EventInstance* event = nullptr;
