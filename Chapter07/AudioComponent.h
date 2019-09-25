@@ -23,7 +23,10 @@ public:
 
 	SoundEvent PlayEvent(const std::string& name);
 	void StopAllEvents();
+
+	void SetCamera(class CameraActor* camera);
 private:
+	class CameraActor* camera;
 	std::vector<SoundEvent> mEvents2D;
 	std::vector<SoundEvent> mEvents3D;
 };

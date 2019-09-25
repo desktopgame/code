@@ -318,6 +318,7 @@ void Game::LoadData()
 	mc = new MeshComponent(a);
 	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
 	AudioComponent* ac = new AudioComponent(a);
+	ac->SetCamera(mCameraActor);
 	ac->PlayEvent("event:/FireLoop");
 
 	// Start music

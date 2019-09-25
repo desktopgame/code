@@ -10,9 +10,10 @@
 #include "Actor.h"
 #include "Game.h"
 #include "AudioSystem.h"
+#include "CameraActor.h"
 
 AudioComponent::AudioComponent(Actor* owner, int updateOrder)
-	:Component(owner, updateOrder)
+	:Component(owner, updateOrder), camera(nullptr)
 {
 }
 
@@ -74,8 +75,20 @@ SoundEvent AudioComponent::PlayEvent(const std::string& name)
 	if (e.Is3D())
 	{
 		mEvents3D.emplace_back(e);
-		// Set initial 3D attributes
-		e.Set3DAttributes(mOwner->GetWorldTransform());
+		if (camera) {
+			// Set initial 3D attributes
+			Vector3 realPos = mOwner->GetPosition();
+			Vector3 playerToSound = realPos - camera->GetPosition();
+			Vector3 cameraToSound = realPos - camera->GetCameraPosition();
+			cameraToSound.Normalize();
+			Vector3 virtualPos = cameraToSound * playerToSound.Length();
+			mOwner->SetPosition(virtualPos);
+			mOwner->ComputeWorldTransform();
+			e.Set3DAttributes(mOwner->GetWorldTransform());
+			mOwner->SetPosition(realPos);
+		} else {
+			e.Set3DAttributes(mOwner->GetWorldTransform());
+		}
 	}
 	else
 	{
@@ -98,4 +111,9 @@ void AudioComponent::StopAllEvents()
 	// Clear events
 	mEvents2D.clear();
 	mEvents3D.clear();
+}
+
+void AudioComponent::SetCamera(CameraActor * camera)
+{
+	this->camera = camera;
 }
