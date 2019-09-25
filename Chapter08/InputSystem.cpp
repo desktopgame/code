@@ -173,6 +173,9 @@ void InputState::ParseBindingFromString(const std::string & source)
 	if (sentence != NULL)
 	{
 		while (std::getline(ss, to, '\n')) {
+			if (to[0] == '#') {
+				continue;
+			}
 			AddBinding(to);
 		}
 	}
