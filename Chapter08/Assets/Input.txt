@@ -1,1 +1,1 @@
-Fire ControllerButton A
+Fire Mouse Left

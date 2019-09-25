@@ -38,7 +38,7 @@ void Ship::UpdateActor(float deltaTime)
 
 void Ship::ActorInput(const InputState& state)
 {
-	if (state.Controller.GetRightTrigger() > 0.25f
+	if (state.GetBoolValue("Fire") > 0.25f
 		&& mLaserCooldown <= 0.0f)
 	{
 		// Create a laser and set its position/rotation to mine
