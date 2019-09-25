@@ -62,7 +62,7 @@ bool Game::Initialize()
 
 	// Initialize input system
 	mInputSystem = new InputSystem();
-	if (!mInputSystem->Initialize())
+	if (!mInputSystem->Initialize("Assets/Input.txt"))
 	{
 		SDL_Log("Failed to initialize input system");
 		return false;
@@ -252,7 +252,6 @@ void Game::CreateSpriteVerts()
 
 void Game::LoadData()
 {
-	mInputSystem->ParseBindingFromFile("Assets/Input.txt");
 	// Create player's ship
 	mShip = new Ship(this);
 	mShip->SetRotation(Math::PiOver2);

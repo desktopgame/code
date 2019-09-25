@@ -108,8 +108,175 @@ ButtonState ControllerState::GetButtonState(SDL_GameControllerButton button) con
 		}
 	}
 }
+InputState::InputState()
+{
+	cButtons[""] = SDL_CONTROLLER_BUTTON_INVALID;
+	cButtons["A"] = SDL_CONTROLLER_BUTTON_A;
+	cButtons["B"] = SDL_CONTROLLER_BUTTON_B;
+	cButtons["X"] = SDL_CONTROLLER_BUTTON_X;
+	cButtons["Y"] = SDL_CONTROLLER_BUTTON_Y;
+	cButtons["Back"] = SDL_CONTROLLER_BUTTON_BACK;
+	cButtons["Guide"] = SDL_CONTROLLER_BUTTON_GUIDE;
+	cButtons["Start"] = SDL_CONTROLLER_BUTTON_START;
+	cButtons["LeftStick"] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+	cButtons["RightStick"] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+	cButtons["LeftShoulder"] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+	cButtons["RightShoulder"] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+	cButtons["DPadUp"] = SDL_CONTROLLER_BUTTON_DPAD_UP;
+	cButtons["DPadDown"] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+	cButtons["DPadLeft"] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+	cButtons["DPadRight"] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+	cButtons[""] = SDL_CONTROLLER_BUTTON_MAX;
+}
+InputState::~InputState()
+{
+	for (auto kv : bindings) {
+		delete kv.second;
+	}
+	ClearBinding();
+}
+// InputState
+bool InputState::GetBoolValue(const std::string & name) const
+{
+	return bindings.at(name)->GetBoolValue(Self());
+}
 
-bool InputSystem::Initialize()
+ButtonState InputState::GetButtonValue(const std::string & name) const
+{
+	return bindings.at(name)->GetButtonValue(Self());
+}
+
+float InputState::GetFloatValue(const std::string & name) const
+{
+	return bindings.at(name)->GetFloatValue(Self());
+}
+
+Vector2 InputState::GetAxisValue(const std::string & name) const
+{
+	return bindings.at(name)->GetAxisValue(Self());
+}
+
+void InputState::ParseBindingFromFile(const std::string & path)
+{
+	std::ifstream ifs(path);
+	std::string str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	ParseBindingFromString(str);
+}
+
+void InputState::ParseBindingFromString(const std::string & source)
+{
+	ClearBinding();
+	const char* sentence = source.c_str();
+	std::stringstream ss(sentence);
+	std::string to;
+
+	if (sentence != NULL)
+	{
+		while (std::getline(ss, to, '\n')) {
+			AddBinding(to);
+		}
+	}
+}
+
+void InputState::AddBinding(const std::string & oneline)
+{
+	std::vector<std::string> words;
+	split(oneline, words, ' ');
+	std::string name = words[0];
+	std::string type = words[1];
+	if (type == "Key") {
+		PutBinding(name, new KeyDetector((SDL_Scancode)words[2].at(0)));
+	}
+	else if (type == "Mouse") {
+		if (words[2] == "Left") {
+			PutBinding(name, new MouseDetector(SDL_BUTTON_LEFT));
+		}
+		else if (words[2] == "Right") {
+			PutBinding(name, new MouseDetector(SDL_BUTTON_RIGHT));
+		}
+		else {
+			throw std::logic_error("unknown mouse type: " + words[2]);
+		}
+	}
+	else if (type == "ControllerButton") {
+		PutBinding(name, new ControllerButtonDetector(cButtons[words[2]]));
+	}
+	else if (type == "ControllerStick") {
+		if (words[2] == "Left") {
+			PutBinding(name, new ControllerStickDetector(ControllerDirection::Left));
+		}
+		else if (words[2] == "Right") {
+			PutBinding(name, new ControllerStickDetector(ControllerDirection::Right));
+		}
+		else {
+			throw std::logic_error("unknown stick type: " + words[2]);
+		}
+	}
+	else if (type == "ControllerTrigger") {
+		if (words[2] == "Left") {
+			PutBinding(name, new ControllerTriggerDetector(ControllerDirection::Left));
+		}
+		else if (words[2] == "Right") {
+			PutBinding(name, new ControllerTriggerDetector(ControllerDirection::Right));
+		}
+		else {
+			throw std::logic_error("unknown stick type: " + words[2]);
+		}
+	}
+	else {
+		throw std::logic_error("unsupported input type: " + type);
+	}
+}
+
+void InputState::PutBinding(const std::string & key, InputDetector * detector)
+{
+	bindings[key] = detector;
+}
+
+void InputState::RemoveBinding(const std::string & key)
+{
+	bindings.erase(key);
+}
+
+bool InputState::HasBinding(const std::string & key) const
+{
+	return bindings.count(key) > 0;
+}
+
+void InputState::ClearBinding()
+{
+	bindings.clear();
+}
+
+const InputState & InputState::Self() const
+{
+	return *this;
+}
+
+size_t InputState::split(const std::string & txt, std::vector<std::string>& strs, char ch)
+{
+	//https://stackoverflow.com/questions/5888022/split-string-by-single-spaces
+	size_t pos = txt.find(ch);
+	size_t initialPos = 0;
+	strs.clear();
+
+	// Decompose statement
+	while (pos != std::string::npos) {
+		strs.push_back(txt.substr(initialPos, pos - initialPos));
+		initialPos = pos + 1;
+
+		pos = txt.find(ch, initialPos);
+	}
+
+	// Add the last one
+	strs.push_back(txt.substr(initialPos, std::min(pos, txt.size()) - initialPos + 1));
+
+	return strs.size();
+}
+
+
+// InputSystem
+bool InputSystem::Initialize(const std::string& bindingFile)
 {
 	// Keyboard
 	// Assign current state pointer
@@ -130,32 +297,12 @@ bool InputSystem::Initialize()
 		SDL_CONTROLLER_BUTTON_MAX);
 	memset(mState.Controller.mPrevButtons, 0,
 		SDL_CONTROLLER_BUTTON_MAX);
-	cButtons[""] = SDL_CONTROLLER_BUTTON_INVALID;
-	cButtons["A"] = SDL_CONTROLLER_BUTTON_A;
-	cButtons["B"] = SDL_CONTROLLER_BUTTON_B;
-	cButtons["X"] = SDL_CONTROLLER_BUTTON_X;
-	cButtons["Y"] = SDL_CONTROLLER_BUTTON_Y;
-	cButtons["Back"] = SDL_CONTROLLER_BUTTON_BACK;
-	cButtons["Guide"] = SDL_CONTROLLER_BUTTON_GUIDE;
-	cButtons["Start"] = SDL_CONTROLLER_BUTTON_START;
-	cButtons["LeftStick"] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
-	cButtons["RightStick"] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-	cButtons["LeftShoulder"] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-	cButtons["RightShoulder"] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-	cButtons["DPadUp"] = SDL_CONTROLLER_BUTTON_DPAD_UP;
-	cButtons["DPadDown"] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-	cButtons["DPadLeft"] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-	cButtons["DPadRight"] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
-	cButtons[""] = SDL_CONTROLLER_BUTTON_MAX;
+	mState.ParseBindingFromFile(bindingFile);
 	return true;
 }
 
 void InputSystem::Shutdown()
 {
-	for (auto kv : bindings) {
-		delete kv.second;
-	}
-	ClearBinding();
 }
 
 void InputSystem::PrepareForUpdate()
@@ -246,128 +393,6 @@ void InputSystem::SetRelativeMouseMode(bool value)
 	SDL_SetRelativeMouseMode(set);
 
 	mState.Mouse.mIsRelative = value;
-}
-
-bool InputSystem::GetBoolValue(const std::string & name) const
-{
-	return bindings.at(name)->GetBoolValue(mState);
-}
-
-ButtonState InputSystem::GetButtonValue(const std::string & name) const
-{
-	return bindings.at(name)->GetButtonValue(mState);
-}
-
-float InputSystem::GetFloatValue(const std::string & name) const
-{
-	return bindings.at(name)->GetFloatValue(mState);
-}
-
-Vector2 InputSystem::GetAxisValue(const std::string & name) const
-{
-	return bindings.at(name)->GetAxisValue(mState);
-}
-
-void InputSystem::ParseBindingFromFile(const std::string & path)
-{
-	std::ifstream ifs(path);
-	std::string str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-	ParseBindingFromString(str);
-}
-
-void InputSystem::ParseBindingFromString(const std::string & source)
-{
-	ClearBinding();
-	const char* sentence = source.c_str();
-	std::stringstream ss(sentence);
-	std::string to;
-
-	if (sentence != NULL)
-	{
-		while (std::getline(ss, to, '\n')) {
-			AddBinding(to);
-		}
-	}
-}
-
-void InputSystem::AddBinding(const std::string & oneline)
-{
-	std::vector<std::string> words;
-	split(oneline, words, ' ');
-	std::string name = words[0];
-	std::string type = words[1];
-	if (type == "Key") {
-		PutBinding(name, new KeyDetector((SDL_Scancode)words[2].at(0)));
-	} else if (type == "Mouse") {
-		if (words[2] == "Left") {
-			PutBinding(name, new MouseDetector(SDL_BUTTON_LEFT));
-		} else if (words[2] == "Right") {
-			PutBinding(name, new MouseDetector(SDL_BUTTON_RIGHT));
-		} else {
-			throw std::logic_error("unknown mouse type: " + words[2]);
-		}
-	} else if (type == "ControllerButton") {
-		PutBinding(name, new ControllerButtonDetector(cButtons[words[2]]));
-	} else if (type == "ControllerStick") {
-		if (words[2] == "Left") {
-			PutBinding(name, new ControllerStickDetector(ControllerDirection::Left));
-		} else if (words[2] == "Right") {
-			PutBinding(name, new ControllerStickDetector(ControllerDirection::Right));
-		} else {
-			throw std::logic_error("unknown stick type: " + words[2]);
-		}
-	} else if (type == "ControllerTrigger") {
-		if (words[2] == "Left") {
-			PutBinding(name, new ControllerTriggerDetector(ControllerDirection::Left));
-		} else if (words[2] == "Right") {
-			PutBinding(name, new ControllerTriggerDetector(ControllerDirection::Right));
-		} else {
-			throw std::logic_error("unknown stick type: " + words[2]);
-		}
-	} else {
-		throw std::logic_error("unsupported input type: " + type);
-	}
-}
-
-void InputSystem::PutBinding(const std::string & key, InputDetector * detector)
-{
-	bindings[key] = detector;
-}
-
-void InputSystem::RemoveBinding(const std::string & key)
-{
-	bindings.erase(key);
-}
-
-bool InputSystem::HasBinding(const std::string & key) const
-{
-	return bindings.count(key) > 0;
-}
-
-void InputSystem::ClearBinding()
-{
-	bindings.clear();
-}
-
-size_t InputSystem::split(const std::string & txt, std::vector<std::string>& strs, char ch)
-{
-	//https://stackoverflow.com/questions/5888022/split-string-by-single-spaces
-	size_t pos = txt.find(ch);
-	size_t initialPos = 0;
-	strs.clear();
-
-	// Decompose statement
-	while (pos != std::string::npos) {
-		strs.push_back(txt.substr(initialPos, pos - initialPos));
-		initialPos = pos + 1;
-
-		pos = txt.find(ch, initialPos);
-	}
-
-	// Add the last one
-	strs.push_back(txt.substr(initialPos, std::min(pos, txt.size()) - initialPos + 1));
-
-	return strs.size();
 }
 
 float InputSystem::Filter1D(int input)

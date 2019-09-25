@@ -93,31 +93,16 @@ private:
 	bool mIsConnected;
 };
 
+class InputDetector;
 // Wrapper that contains current state of input
-struct InputState
+class InputState
 {
+public:
+	InputState();
+	~InputState();
 	KeyboardState Keyboard;
 	MouseState Mouse;
 	ControllerState Controller;
-};
-
-class InputDetector;
-class InputSystem
-{
-public:
-	bool Initialize();
-	void Shutdown();
-
-	// Called right before SDL_PollEvents loop
-	void PrepareForUpdate();
-	// Called after SDL_PollEvents loop
-	void Update();
-	// Called to process an SDL event in input system
-	void ProcessEvent(union SDL_Event& event);
-
-	const InputState& GetState() const { return mState; }
-
-	void SetRelativeMouseMode(bool value);
 
 	bool GetBoolValue(const std::string& name) const;
 	ButtonState GetButtonValue(const std::string& name) const;
@@ -132,11 +117,33 @@ public:
 	bool HasBinding(const std::string& key) const;
 	void ClearBinding();
 private:
+	const InputState& Self() const;
+	std::unordered_map<std::string, InputDetector*> bindings;
+	std::unordered_map<std::string, SDL_GameControllerButton> cButtons;
 	static size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
+};
+
+class InputSystem
+{
+public:
+	bool Initialize(const std::string& bindingFile);
+	void Shutdown();
+
+	// Called right before SDL_PollEvents loop
+	void PrepareForUpdate();
+	// Called after SDL_PollEvents loop
+	void Update();
+	// Called to process an SDL event in input system
+	void ProcessEvent(union SDL_Event& event);
+
+	const InputState& GetState() const { return mState; }
+
+	void SetRelativeMouseMode(bool value);
+
+
+private:
 	float Filter1D(int input);
 	Vector2 Filter2D(int inputX, int inputY);
 	InputState mState;
 	SDL_GameController* mController;
-	std::unordered_map<std::string, InputDetector*> bindings;
-	std::unordered_map<std::string, SDL_GameControllerButton> cButtons;
 };
