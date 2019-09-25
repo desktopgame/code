@@ -179,6 +179,21 @@ void Game::UpdateGame()
 		actor->Update(deltaTime);
 	}
 	mUpdatingActors = false;
+	const float WAIT = 2.0f;
+	const float DISTANCE = 1000;
+	this->mElapsed += deltaTime;
+	if (mElapsed >= WAIT) {
+		this->mToRight = !mToRight;
+		this->mElapsed = 0;
+		this->mBasePoint = mMoveSphere->GetPosition();
+	} else {
+		float par = mElapsed / WAIT;
+		if (mToRight) {
+			mMoveSphere->SetPosition(mBasePoint + (Vector3(DISTANCE, 0, 0) * par));
+		} else {
+			mMoveSphere->SetPosition(mBasePoint - (Vector3(DISTANCE, 0, 0) * par));
+		}
+	}
 
 	// Move any pending actors to mActors
 	for (auto pending : mPendingActors)
@@ -215,6 +230,7 @@ void Game::GenerateOutput()
 
 void Game::LoadData()
 {
+	mAudioSystem->Set3DSettings(1.0f, 50.0f, 1.0f);
 	// Create actors
 	Actor* a = new Actor(this);
 	a->SetPosition(Vector3(200.0f, 75.0f, 0.0f));
@@ -295,6 +311,10 @@ void Game::LoadData()
 	a = new Actor(this);
 	a->SetPosition(Vector3(500.0f, -75.0f, 0.0f));
 	a->SetScale(1.0f);
+	this->mMoveSphere = a;
+	this->mBasePoint = a->GetPosition();
+	this->mElapsed = 0.0f;
+	this->mToRight = true;
 	mc = new MeshComponent(a);
 	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
 	AudioComponent* ac = new AudioComponent(a);

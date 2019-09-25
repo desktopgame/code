@@ -52,4 +52,9 @@ private:
 	class CameraActor* mCameraActor;
 	SoundEvent mMusicEvent;
 	SoundEvent mReverbSnap;
+
+	class Actor* mMoveSphere;
+	Vector3 mBasePoint;
+	float mElapsed;
+	bool mToRight;
 };
