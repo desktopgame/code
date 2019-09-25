@@ -1,1 +1,4 @@
 Fire Mouse Left
+#こっちを有効にするとAキーが有効になる
+#数字の詳細は SDL_scancode.h に
+#Fire Key 4
