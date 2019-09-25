@@ -5,22 +5,22 @@ KeyDetector::KeyDetector(SDL_Scancode code) : code(code)
 {
 }
 
-bool KeyDetector::GetBoolValue(InputState & state) const
+bool KeyDetector::GetBoolValue(const InputState & state) const
 {
 	return state.Keyboard.GetKeyValue(code);
 }
 
-ButtonState KeyDetector::GetButtonValue(InputState & state) const
+ButtonState KeyDetector::GetButtonValue(const InputState & state) const
 {
 	return state.Keyboard.GetKeyState(code);
 }
 
-float KeyDetector::GetFloatValue(InputState & state) const
+float KeyDetector::GetFloatValue(const InputState & state) const
 {
 	return GetBoolValue(state) ? 1 : 0;
 }
 
-Vector2 KeyDetector::GetAxisValue(InputState & state) const
+Vector2 KeyDetector::GetAxisValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
@@ -29,22 +29,22 @@ MouseDetector::MouseDetector(int button) : button(button)
 {
 }
 
-bool MouseDetector::GetBoolValue(InputState & state) const
+bool MouseDetector::GetBoolValue(const InputState & state) const
 {
 	return state.Mouse.GetButtonValue(button);
 }
 
-ButtonState MouseDetector::GetButtonValue(InputState & state) const
+ButtonState MouseDetector::GetButtonValue(const InputState & state) const
 {
 	return state.Mouse.GetButtonState(button);
 }
 
-float MouseDetector::GetFloatValue(InputState & state) const
+float MouseDetector::GetFloatValue(const InputState & state) const
 {
 	return GetBoolValue(state) ? 1 : 0;
 }
 
-Vector2 MouseDetector::GetAxisValue(InputState & state) const
+Vector2 MouseDetector::GetAxisValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
@@ -53,22 +53,22 @@ ControllerButtonDetector::ControllerButtonDetector(SDL_GameControllerButton butt
 {
 }
 
-bool ControllerButtonDetector::GetBoolValue(InputState & state) const
+bool ControllerButtonDetector::GetBoolValue(const InputState & state) const
 {
 	return state.Controller.GetButtonValue(button);
 }
 
-ButtonState ControllerButtonDetector::GetButtonValue(InputState & state) const
+ButtonState ControllerButtonDetector::GetButtonValue(const InputState & state) const
 {
 	return state.Controller.GetButtonState(button);
 }
 
-float ControllerButtonDetector::GetFloatValue(InputState & state) const
+float ControllerButtonDetector::GetFloatValue(const InputState & state) const
 {
 	return GetBoolValue(state) ? 1 : 0;
 }
 
-Vector2 ControllerButtonDetector::GetAxisValue(InputState & state) const
+Vector2 ControllerButtonDetector::GetAxisValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
@@ -77,22 +77,22 @@ ControllerStickDetector::ControllerStickDetector(ControllerDirection direction) 
 {
 }
 
-bool ControllerStickDetector::GetBoolValue(InputState & state) const
+bool ControllerStickDetector::GetBoolValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
 
-ButtonState ControllerStickDetector::GetButtonValue(InputState & state) const
+ButtonState ControllerStickDetector::GetButtonValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
 
-float ControllerStickDetector::GetFloatValue(InputState & state) const
+float ControllerStickDetector::GetFloatValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
 
-Vector2 ControllerStickDetector::GetAxisValue(InputState & state) const
+Vector2 ControllerStickDetector::GetAxisValue(const InputState & state) const
 {
 	if (direction == ControllerDirection::Left) {
 		return state.Controller.GetLeftStick();
@@ -105,17 +105,17 @@ ControllerTriggerDetector::ControllerTriggerDetector(ControllerDirection directi
 {
 }
 
-bool ControllerTriggerDetector::GetBoolValue(InputState & state) const
+bool ControllerTriggerDetector::GetBoolValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
 
-ButtonState ControllerTriggerDetector::GetButtonValue(InputState & state) const
+ButtonState ControllerTriggerDetector::GetButtonValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
 
-float ControllerTriggerDetector::GetFloatValue(InputState & state) const
+float ControllerTriggerDetector::GetFloatValue(const InputState & state) const
 {
 	if (direction == ControllerDirection::Left) {
 		return state.Controller.GetLeftTrigger();
@@ -124,7 +124,7 @@ float ControllerTriggerDetector::GetFloatValue(InputState & state) const
 	}
 }
 
-Vector2 ControllerTriggerDetector::GetAxisValue(InputState & state) const
+Vector2 ControllerTriggerDetector::GetAxisValue(const InputState & state) const
 {
 	throw std::logic_error("unsupported operation");
 }
