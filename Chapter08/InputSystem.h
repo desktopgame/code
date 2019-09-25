@@ -119,8 +119,14 @@ public:
 
 	void SetRelativeMouseMode(bool value);
 
+	bool GetBoolValue(const std::string& name) const;
+	ButtonState GetButtonValue(const std::string& name) const;
+	float GetFloatValue(const std::string& name) const;
+	Vector2 GetAxisValue(const std::string& name) const;
+
 	void ParseBindingFromFile(const std::string& path);
 	void ParseBindingFromString(const std::string& source);
+	void AddBinding(const std::string& oneline);
 	void PutBinding(const std::string& key, InputDetector* detector);
 	void RemoveBinding(const std::string& key);
 	bool HasBinding(const std::string& key) const;
@@ -132,4 +138,5 @@ private:
 	InputState mState;
 	SDL_GameController* mController;
 	std::unordered_map<std::string, InputDetector*> bindings;
+	std::unordered_map<std::string, SDL_GameControllerButton> cButtons;
 };

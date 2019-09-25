@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include "InputDetector.h"
 
 bool KeyboardState::GetKeyValue(SDL_Scancode keyCode) const
 {
@@ -129,7 +130,23 @@ bool InputSystem::Initialize()
 		SDL_CONTROLLER_BUTTON_MAX);
 	memset(mState.Controller.mPrevButtons, 0,
 		SDL_CONTROLLER_BUTTON_MAX);
-
+	cButtons[""] = SDL_CONTROLLER_BUTTON_INVALID;
+	cButtons["A"] = SDL_CONTROLLER_BUTTON_A;
+	cButtons["B"] = SDL_CONTROLLER_BUTTON_B;
+	cButtons["X"] = SDL_CONTROLLER_BUTTON_X;
+	cButtons["Y"] = SDL_CONTROLLER_BUTTON_Y;
+	cButtons["Back"] = SDL_CONTROLLER_BUTTON_BACK;
+	cButtons["Guide"] = SDL_CONTROLLER_BUTTON_GUIDE;
+	cButtons["Start"] = SDL_CONTROLLER_BUTTON_START;
+	cButtons["LeftStick"] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+	cButtons["RightStick"] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+	cButtons["LeftShoulder"] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+	cButtons["RightShoulder"] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+	cButtons["DPadUp"] = SDL_CONTROLLER_BUTTON_DPAD_UP;
+	cButtons["DPadDown"] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+	cButtons["DPadLeft"] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+	cButtons["DPadRight"] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+	cButtons[""] = SDL_CONTROLLER_BUTTON_MAX;
 	return true;
 }
 
@@ -231,6 +248,26 @@ void InputSystem::SetRelativeMouseMode(bool value)
 	mState.Mouse.mIsRelative = value;
 }
 
+bool InputSystem::GetBoolValue(const std::string & name) const
+{
+	return bindings.at(name)->GetBoolValue(mState);
+}
+
+ButtonState InputSystem::GetButtonValue(const std::string & name) const
+{
+	return bindings.at(name)->GetButtonValue(mState);
+}
+
+float InputSystem::GetFloatValue(const std::string & name) const
+{
+	return bindings.at(name)->GetFloatValue(mState);
+}
+
+Vector2 InputSystem::GetAxisValue(const std::string & name) const
+{
+	return bindings.at(name)->GetAxisValue(mState);
+}
+
 void InputSystem::ParseBindingFromFile(const std::string & path)
 {
 	std::ifstream ifs(path);
@@ -248,8 +285,47 @@ void InputSystem::ParseBindingFromString(const std::string & source)
 	if (sentence != NULL)
 	{
 		while (std::getline(ss, to, '\n')) {
-			std::cout << to << std::endl;
+			AddBinding(to);
 		}
+	}
+}
+
+void InputSystem::AddBinding(const std::string & oneline)
+{
+	std::vector<std::string> words;
+	split(oneline, words, ' ');
+	std::string name = words[0];
+	std::string type = words[1];
+	if (type == "Key") {
+		PutBinding(name, new KeyDetector((SDL_Scancode)words[2].at(0)));
+	} else if (type == "Mouse") {
+		if (words[2] == "Left") {
+			PutBinding(name, new MouseDetector(SDL_BUTTON_LEFT));
+		} else if (words[2] == "Right") {
+			PutBinding(name, new MouseDetector(SDL_BUTTON_RIGHT));
+		} else {
+			throw std::logic_error("unknown mouse type: " + words[2]);
+		}
+	} else if (type == "ControllerButton") {
+		PutBinding(name, new ControllerButtonDetector(cButtons[words[2]]));
+	} else if (type == "ControllerStick") {
+		if (words[2] == "Left") {
+			PutBinding(name, new ControllerStickDetector(ControllerDirection::Left));
+		} else if (words[2] == "Right") {
+			PutBinding(name, new ControllerStickDetector(ControllerDirection::Right));
+		} else {
+			throw std::logic_error("unknown stick type: " + words[2]);
+		}
+	} else if (type == "ControllerTrigger") {
+		if (words[2] == "Left") {
+			PutBinding(name, new ControllerTriggerDetector(ControllerDirection::Left));
+		} else if (words[2] == "Right") {
+			PutBinding(name, new ControllerTriggerDetector(ControllerDirection::Right));
+		} else {
+			throw std::logic_error("unknown stick type: " + words[2]);
+		}
+	} else {
+		throw std::logic_error("unsupported input type: " + type);
 	}
 }
 
