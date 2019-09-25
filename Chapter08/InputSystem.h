@@ -126,6 +126,7 @@ public:
 	bool HasBinding(const std::string& key) const;
 	void ClearBinding();
 private:
+	static size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
 	float Filter1D(int input);
 	Vector2 Filter2D(int inputX, int inputY);
 	InputState mState;
