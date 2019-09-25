@@ -8,7 +8,10 @@
 
 #include "InputSystem.h"
 #include <SDL/SDL.h>
+#include <sstream>
 #include <cstring>
+#include <iostream>
+#include <fstream>
 
 bool KeyboardState::GetKeyValue(SDL_Scancode keyCode) const
 {
@@ -131,6 +134,10 @@ bool InputSystem::Initialize()
 
 void InputSystem::Shutdown()
 {
+	for (auto kv : bindings) {
+		delete kv.second;
+	}
+	ClearBinding();
 }
 
 void InputSystem::PrepareForUpdate()
@@ -221,6 +228,48 @@ void InputSystem::SetRelativeMouseMode(bool value)
 	SDL_SetRelativeMouseMode(set);
 
 	mState.Mouse.mIsRelative = value;
+}
+
+void InputSystem::ParseBindingFromFile(const std::string & path)
+{
+	std::ifstream ifs(path);
+	std::string str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	ParseBindingFromString(str);
+}
+
+void InputSystem::ParseBindingFromString(const std::string & source)
+{
+	ClearBinding();
+	const char* sentence = source.c_str();
+	std::stringstream ss(sentence);
+	std::string to;
+
+	if (sentence != NULL)
+	{
+		while (std::getline(ss, to, '\n')) {
+			std::cout << to << std::endl;
+		}
+	}
+}
+
+void InputSystem::PutBinding(const std::string & key, InputDetector * detector)
+{
+	bindings[key] = detector;
+}
+
+void InputSystem::RemoveBinding(const std::string & key)
+{
+	bindings.erase(key);
+}
+
+bool InputSystem::HasBinding(const std::string & key) const
+{
+	return bindings.count(key) > 0;
+}
+
+void InputSystem::ClearBinding()
+{
+	bindings.clear();
 }
 
 float InputSystem::Filter1D(int input)

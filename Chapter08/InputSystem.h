@@ -10,6 +10,7 @@
 #include <SDL/SDL_scancode.h>
 #include <SDL/SDL_gamecontroller.h>
 #include <SDL/SDL_mouse.h>
+#include <unordered_map>
 #include "Math.h"
 
 // The different button states
@@ -100,6 +101,7 @@ struct InputState
 	ControllerState Controller;
 };
 
+class InputDetector;
 class InputSystem
 {
 public:
@@ -116,9 +118,17 @@ public:
 	const InputState& GetState() const { return mState; }
 
 	void SetRelativeMouseMode(bool value);
+
+	void ParseBindingFromFile(const std::string& path);
+	void ParseBindingFromString(const std::string& source);
+	void PutBinding(const std::string& key, InputDetector* detector);
+	void RemoveBinding(const std::string& key);
+	bool HasBinding(const std::string& key) const;
+	void ClearBinding();
 private:
 	float Filter1D(int input);
 	Vector2 Filter2D(int inputX, int inputY);
 	InputState mState;
 	SDL_GameController* mController;
+	std::unordered_map<std::string, InputDetector*> bindings;
 };

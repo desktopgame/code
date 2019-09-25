@@ -252,6 +252,7 @@ void Game::CreateSpriteVerts()
 
 void Game::LoadData()
 {
+	mInputSystem->ParseBindingFromFile("Assets/Input.txt");
 	// Create player's ship
 	mShip = new Ship(this);
 	mShip->SetRotation(Math::PiOver2);
