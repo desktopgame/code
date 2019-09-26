@@ -21,6 +21,9 @@
 
 FPSActor::FPSActor(Game* game)
 	:Actor(game)
+	,mState(FPSActorState::None)
+	,mVelocityY(0)
+	,mGravityY(0)
 {
 	mMoveComp = new MoveComponent(this);
 	mAudioComp = new AudioComponent(this);
@@ -95,7 +98,16 @@ void FPSActor::ActorInput(const uint8_t* keys)
 	{
 		strafeSpeed += 400.0f;
 	}
-
+	if (this->mState == FPSActorState::None && keys[SDL_SCANCODE_SPACE]) {
+		this->mState = FPSActorState::Jump;
+		this->mVelocityY = 100;
+		this->mGravityY = 0;
+	} else if (this->mState == FPSActorState::Jump) {
+		// add gravity
+		const float GRAVITY_SCALE = 1.0f;
+		this->mGravityY -= GRAVITY_SCALE;
+		this->mVelocityY += mGravityY;
+	}
 	mMoveComp->SetForwardSpeed(forwardSpeed);
 	mMoveComp->SetStrafeSpeed(strafeSpeed);
 
@@ -127,6 +139,15 @@ void FPSActor::ActorInput(const uint8_t* keys)
 		pitchSpeed *= maxPitchSpeed;
 	}
 	mCameraComp->SetPitchSpeed(pitchSpeed);
+	if (this->mState == FPSActorState::Jump) {
+		Vector3 curPos = this->GetPosition();
+		Vector3 newPos = curPos + (Vector3::UnitZ * mVelocityY);
+		if (newPos.z < 0) {
+			newPos.z = 0;
+			this->mState = FPSActorState::None;
+		}
+		this->SetPosition(newPos);
+	}
 }
 
 void FPSActor::Shoot()

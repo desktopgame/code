@@ -10,6 +10,11 @@
 #include "Actor.h"
 #include "SoundEvent.h"
 
+enum class FPSActorState {
+	None,
+	Jump,
+	Fall,
+};
 class FPSActor : public Actor
 {
 public:
@@ -34,4 +39,7 @@ private:
 	class Actor* mFPSModel;
 	SoundEvent mFootstep;
 	float mLastFootstep;
+	FPSActorState mState;
+	float mGravityY;
+	float mVelocityY;
 };
