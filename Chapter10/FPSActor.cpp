@@ -18,6 +18,7 @@
 #include "BallActor.h"
 #include "BoxComponent.h"
 #include "PlaneActor.h"
+#include "PhysWorld.h"
 
 FPSActor::FPSActor(Game* game)
 	:Actor(game)
@@ -49,6 +50,26 @@ FPSActor::FPSActor(Game* game)
 void FPSActor::UpdateActor(float deltaTime)
 {
 	Actor::UpdateActor(deltaTime);
+	if (this->mState == FPSActorState::Jump) {
+		// add gravity
+		const float GRAVITY_SCALE = 1.0f;
+		this->mGravityY -= GRAVITY_SCALE;
+		this->mVelocityY += mGravityY;
+		// update position
+		Vector3 curPos = this->GetPosition() + (Vector3::NegUnitZ * (87.5f * 2.f));
+		Vector3 newPos = curPos + (Vector3::UnitZ * mVelocityY);
+		LineSegment lineSeg(curPos, newPos);
+		PhysWorld::CollisionInfo cinfo;
+		if (GetGame()->GetPhysWorld()->SegmentCast(lineSeg, cinfo) &&
+			mVelocityY < 0 &&
+			this != cinfo.mActor) {
+			newPos.y = cinfo.mPoint.y;
+			this->mState = FPSActorState::None;
+		}
+		Vector3 tmp = this->GetPosition() + (Vector3::UnitZ * mVelocityY);
+		tmp.y = newPos.y;
+		this->SetPosition(tmp);
+	}
 
 	FixCollisions();
 
@@ -99,14 +120,10 @@ void FPSActor::ActorInput(const uint8_t* keys)
 		strafeSpeed += 400.0f;
 	}
 	if (this->mState == FPSActorState::None && keys[SDL_SCANCODE_SPACE]) {
+		const float JUMP_POWER = 100.0f;
 		this->mState = FPSActorState::Jump;
-		this->mVelocityY = 100;
+		this->mVelocityY = JUMP_POWER;
 		this->mGravityY = 0;
-	} else if (this->mState == FPSActorState::Jump) {
-		// add gravity
-		const float GRAVITY_SCALE = 1.0f;
-		this->mGravityY -= GRAVITY_SCALE;
-		this->mVelocityY += mGravityY;
 	}
 	mMoveComp->SetForwardSpeed(forwardSpeed);
 	mMoveComp->SetStrafeSpeed(strafeSpeed);
@@ -139,15 +156,6 @@ void FPSActor::ActorInput(const uint8_t* keys)
 		pitchSpeed *= maxPitchSpeed;
 	}
 	mCameraComp->SetPitchSpeed(pitchSpeed);
-	if (this->mState == FPSActorState::Jump) {
-		Vector3 curPos = this->GetPosition();
-		Vector3 newPos = curPos + (Vector3::UnitZ * mVelocityY);
-		if (newPos.z < 0) {
-			newPos.z = 0;
-			this->mState = FPSActorState::None;
-		}
-		this->SetPosition(newPos);
-	}
 }
 
 void FPSActor::Shoot()
