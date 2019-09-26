@@ -8,6 +8,7 @@
 
 #include "FollowCamera.h"
 #include "Actor.h"
+#include "Game.h"
 
 FollowCamera::FollowCamera(Actor* owner)
 	:CameraComponent(owner)
@@ -15,6 +16,10 @@ FollowCamera::FollowCamera(Actor* owner)
 	,mVertDist(150.0f)
 	,mTargetDist(100.0f)
 	,mSpringConstant(64.0f)
+	,mOffset(-400.0f, 0.0f, 0.0f)
+	,mUp(Vector3::UnitZ)
+	,mPitchSpeed(0.0f)
+	,mYawSpeed(0.0f)
 {
 }
 
@@ -39,8 +44,43 @@ void FollowCamera::Update(float deltaTime)
 		mOwner->GetForward() * mTargetDist;
 	// Use actual position here, not ideal
 	Matrix4 view = Matrix4::CreateLookAt(mActualPos, target,
-		Vector3::UnitZ);
-	SetViewMatrix(view);
+		mUp);
+
+	int x, y;
+	Uint32 buttons = SDL_GetMouseState(&x, &y);
+	bool leftIsDown = (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
+	if (leftIsDown) {
+		this->mYawSpeed = 1.0f;
+		this->mPitchSpeed = 1.0f;
+		// Create a quaternion for yaw about world up
+		Quaternion yaw(Vector3::UnitZ, mYawSpeed * deltaTime);
+		// Transform offset and up by yaw
+		mOffset = Vector3::Transform(mOffset, yaw);
+		mUp = Vector3::Transform(mUp, yaw);
+
+		// Compute camera forward/right from these vectors
+		// Forward owner.position - (owner.position + offset)
+		// = -offset
+		Vector3 forward = -1.0f * mOffset;
+		forward.Normalize();
+		Vector3 right = Vector3::Cross(mUp, forward);
+		right.Normalize();
+
+		// Create quaternion for pitch about camera right
+		Quaternion pitch(right, mPitchSpeed * deltaTime);
+		// Transform camera offset and up by pitch
+		mOffset = Vector3::Transform(mOffset, pitch);
+		mUp = Vector3::Transform(mUp, pitch);
+
+		Matrix4 pm = Matrix4::CreateFromQuaternion(pitch);
+		Matrix4 ym = Matrix4::CreateFromQuaternion(yaw);
+		SetViewMatrix(view * pm * ym);
+	} else {
+		mOffset = Vector3(-400.0f, 0.0f, 0.0f);
+		mUp = (Vector3::UnitZ);
+		mPitchSpeed = (0.0f);
+		SetViewMatrix(view);
+	}
 }
 
 void FollowCamera::SnapToIdeal()
