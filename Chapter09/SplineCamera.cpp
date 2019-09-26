@@ -43,6 +43,7 @@ SplineCamera::SplineCamera(Actor* owner)
 	,mT(0.0f)
 	,mSpeed(0.5f)
 	,mPaused(true)
+	,mReturn(false)
 {
 }
 
@@ -50,7 +51,7 @@ void SplineCamera::Update(float deltaTime)
 {
 	CameraComponent::Update(deltaTime);
 	// Update t value
-	if (!mPaused)
+	if (!mReturn && !mPaused)
 	{
 		mT += mSpeed * deltaTime;
 		// Advance to the next control point if needed.
@@ -67,7 +68,29 @@ void SplineCamera::Update(float deltaTime)
 			else
 			{
 				// Path's done, so pause
+				mPaused = false;
+				mReturn = true;
+			}
+		}
+	}
+	if (mReturn && !mPaused) {
+		mT += mSpeed * deltaTime;
+		// Advance to the next control point if needed.
+		// This assumes speed isn't so fast that you jump past
+		// multiple control points in one frame.
+		if (mT >= 1.0f)
+		{
+			// Make sure we have enough points to advance the path
+			if (mIndex > 1)
+			{
+				mIndex--;
+				mT = mT - 1.0f;
+			}
+			else
+			{
+				// Path's done, so pause
 				mPaused = true;
+				mReturn = false;
 			}
 		}
 	}

@@ -45,4 +45,5 @@ private:
 	float mSpeed;
 	// Whether to move the camera long the path
 	bool mPaused;
+	bool mReturn;
 };
