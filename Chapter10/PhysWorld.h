@@ -44,5 +44,9 @@ public:
 	void RemoveBox(class BoxComponent* box);
 private:
 	class Game* mGame;
+	static void RemoveBox(std::vector<class BoxComponent*> src, class BoxComponent* box);
 	std::vector<class BoxComponent*> mBoxes;
+	std::vector<class BoxComponent*> mXBoxes;
+	std::vector<class BoxComponent*> mYBoxes;
+	std::vector<class BoxComponent*> mZBoxes;
 };
