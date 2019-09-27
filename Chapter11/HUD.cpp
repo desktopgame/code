@@ -150,9 +150,9 @@ void HUD::UpdateRadar(float deltaTime)
 			blipPos = Vector2::Transform(blipPos, rotMat);
 			icon.mPosition = blipPos;
 			icon.mTexture = mBlipTex;
-			if (targetPos.y > playerPos.y) {
+			if (targetPos.z  > playerPos.z) {
 				icon.mTexture = mHighBlipTex;
-			} else if (targetPos.y < playerPos.y) {
+			} else if (targetPos.z < playerPos.z) {
 				icon.mTexture = mLowBlipTex;
 			}
 			mBlips.emplace_back(icon);
