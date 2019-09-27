@@ -36,6 +36,8 @@ protected:
 	class Texture* mCrosshair;
 	class Texture* mCrosshairEnemy;
 	class Texture* mBlipTex;
+	class Texture* mHighBlipTex;
+	class Texture* mLowBlipTex;
 	class Texture* mRadarArrow;
 	
 	// All the target components in the game

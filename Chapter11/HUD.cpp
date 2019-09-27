@@ -28,6 +28,8 @@ HUD::HUD(Game* game)
 	mCrosshair = r->GetTexture("Assets/Crosshair.png");
 	mCrosshairEnemy = r->GetTexture("Assets/CrosshairRed.png");
 	mBlipTex = r->GetTexture("Assets/Blip.png");
+	mHighBlipTex = r->GetTexture("Assets/BlipUp.png");
+	mLowBlipTex = r->GetTexture("Assets/BlipDown.png");
 	mRadarArrow = r->GetTexture("Assets/RadarArrow.png");
 }
 
@@ -139,6 +141,11 @@ void HUD::UpdateRadar(float deltaTime)
 			blipPos = Vector2::Transform(blipPos, rotMat);
 			icon.mPosition = blipPos;
 			icon.mTexture = mBlipTex;
+			if (targetPos.y > playerPos.y) {
+				icon.mTexture = mHighBlipTex;
+			} else if (targetPos.y < playerPos.y) {
+				icon.mTexture = mLowBlipTex;
+			}
 			mBlips.emplace_back(icon);
 		}
 	}
