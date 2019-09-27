@@ -38,6 +38,7 @@ public:
 	
 	enum GameState
 	{
+		EMainMenu,
 		EGameplay,
 		EPaused,
 		EQuit

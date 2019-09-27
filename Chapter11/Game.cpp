@@ -26,6 +26,7 @@
 #include <fstream>
 #include <sstream>
 #include <rapidjson/document.h>
+#include "MainMenu.h"
 
 Game::Game()
 :mRenderer(nullptr)
@@ -355,6 +356,7 @@ void Game::LoadData()
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	// Make an initial call to get relative to clear out
 	SDL_GetRelativeMouseState(nullptr, nullptr);
+	new MainMenu(this);
 
 	// Different camera actors
 	mFPSActor = new FPSActor(this);

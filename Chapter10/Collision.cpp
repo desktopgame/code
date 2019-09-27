@@ -300,6 +300,26 @@ bool Intersect(const AABB& a, const AABB& b)
 	return !no;
 }
 
+bool Intersect(const OBB & a, const OBB & b)
+{
+	Vector3 aNAxisX = Vector3::Transform(Vector3::UnitX, a.mRotation);
+	Vector3 aNAxisY = Vector3::Transform(Vector3::UnitY, a.mRotation);
+	Vector3 aNAxisZ = Vector3::Transform(Vector3::UnitZ, a.mRotation);
+	Vector3 bNAxisX = Vector3::Transform(Vector3::UnitX, b.mRotation);
+	Vector3 bNAxisY = Vector3::Transform(Vector3::UnitY, b.mRotation);
+	Vector3 bNAxisZ = Vector3::Transform(Vector3::UnitZ, b.mRotation);
+
+	
+	Vector3 aAxisX = aNAxisX * a.mExtents.x;
+	Vector3 aAxisY = aNAxisX * a.mExtents.y;
+	Vector3 aAxisZ = aNAxisX * a.mExtents.z;
+	Vector3 bAxisX = aNAxisX * a.mExtents.x;
+	Vector3 bAxisY = aNAxisX * a.mExtents.y;
+	Vector3 bAxisZ = aNAxisX * a.mExtents.z;
+
+	return false;
+}
+
 bool Intersect(const Capsule& a, const Capsule& b)
 {
 	float distSq = LineSegment::MinDistSq(a.mSegment, 
