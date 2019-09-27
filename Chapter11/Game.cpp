@@ -34,6 +34,7 @@ Game::Game()
 ,mPhysWorld(nullptr)
 ,mGameState(EGameplay)
 ,mUpdatingActors(false)
+,mGenActors(false)
 {
 	
 }
@@ -284,6 +285,9 @@ void Game::UpdateGame()
 			++iter;
 		}
 	}
+	if (this->mGameState == EGameplay) {
+		GenActors();
+	}
 }
 
 void Game::GenerateOutput()
@@ -296,6 +300,41 @@ void Game::LoadData()
 	// Load English text
 	LoadText("Assets/English.gptext");
 
+	// Enable relative mouse mode for camera look
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	// Make an initial call to get relative to clear out
+	SDL_GetRelativeMouseState(nullptr, nullptr);
+	new MainMenu(this);
+}
+
+void Game::UnloadData()
+{
+	// Delete actors
+	// Because ~Actor calls RemoveActor, have to use a different style loop
+	while (!mActors.empty())
+	{
+		delete mActors.back();
+	}
+
+	// Clear the UI stack
+	while (!mUIStack.empty())
+	{
+		delete mUIStack.back();
+		mUIStack.pop_back();
+	}
+
+	if (mRenderer)
+	{
+		mRenderer->UnloadData();
+	}
+}
+
+void Game::GenActors()
+{
+	if (mGenActors) {
+		return;
+	}
+	this->mGenActors = true;
 	// Create actors
 	Actor* a = nullptr;
 	Quaternion q;
@@ -320,7 +359,7 @@ void Game::LoadData()
 		a = new PlaneActor(this);
 		a->SetPosition(Vector3(start + i * size, start - size, 0.0f));
 		a->SetRotation(q);
-		
+
 		a = new PlaneActor(this);
 		a->SetPosition(Vector3(start + i * size, -start + size, 0.0f));
 		a->SetRotation(q);
@@ -348,15 +387,9 @@ void Game::LoadData()
 
 	// UI elements
 	mHUD = new HUD(this);
-	
+
 	// Start music
 	mMusicEvent = mAudioSystem->PlayEvent("event:/Music");
-
-	// Enable relative mouse mode for camera look
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	// Make an initial call to get relative to clear out
-	SDL_GetRelativeMouseState(nullptr, nullptr);
-	new MainMenu(this);
 
 	// Different camera actors
 	mFPSActor = new FPSActor(this);
@@ -376,28 +409,6 @@ void Game::LoadData()
 	a = new TargetActor(this);
 	a->SetPosition(Vector3(0.0f, 1450.0f, 200.0f));
 	a->SetRotation(Quaternion(Vector3::UnitZ, -Math::PiOver2));
-}
-
-void Game::UnloadData()
-{
-	// Delete actors
-	// Because ~Actor calls RemoveActor, have to use a different style loop
-	while (!mActors.empty())
-	{
-		delete mActors.back();
-	}
-
-	// Clear the UI stack
-	while (!mUIStack.empty())
-	{
-		delete mUIStack.back();
-		mUIStack.pop_back();
-	}
-
-	if (mRenderer)
-	{
-		mRenderer->UnloadData();
-	}
 }
 
 void Game::Shutdown()

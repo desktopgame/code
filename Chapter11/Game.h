@@ -62,6 +62,7 @@ private:
 	void GenerateOutput();
 	void LoadData();
 	void UnloadData();
+	void GenActors();
 	
 	// All the actors in the game
 	std::vector<class Actor*> mActors;
@@ -88,4 +89,5 @@ private:
 	class FPSActor* mFPSActor;
 	class SpriteComponent* mCrosshair;
 	SoundEvent mMusicEvent;
+	bool mGenActors;
 };
