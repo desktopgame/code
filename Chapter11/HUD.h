@@ -10,6 +10,11 @@
 #include "UIScreen.h"
 #include <vector>
 
+struct Icon {
+	Vector2 mPosition;
+	class Texture* mTexture;
+};
+
 class HUD : public UIScreen
 {
 public:
@@ -36,7 +41,7 @@ protected:
 	// All the target components in the game
 	std::vector<class TargetComponent*> mTargetComps;
 	// 2D offsets of blips relative to radar
-	std::vector<Vector2> mBlips;
+	std::vector<Icon> mBlips;
 	// Adjust range of radar and radius
 	float mRadarRange;
 	float mRadarRadius;

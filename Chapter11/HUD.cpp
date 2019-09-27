@@ -53,9 +53,9 @@ void HUD::Draw(Shader* shader)
 	const Vector2 cRadarPos(-390.0f, 275.0f);
 	DrawTexture(shader, mRadar, cRadarPos, 1.0f);
 	// Blips
-	for (Vector2& blip : mBlips)
+	for (Icon& icon : mBlips)
 	{
-		DrawTexture(shader, mBlipTex, cRadarPos + blip, 1.0f);
+		DrawTexture(shader, icon.mTexture, cRadarPos + icon.mPosition, 1.0f);
 	}
 	// Radar arrow
 	DrawTexture(shader, mRadarArrow, cRadarPos);
@@ -117,7 +117,7 @@ void HUD::UpdateRadar(float deltaTime)
 	float angle = Math::Atan2(playerForward2D.y, playerForward2D.x);
 	// Make a 2D rotation matrix
 	Matrix3 rotMat = Matrix3::CreateRotation(angle);
-	
+	Icon icon;
 	// Get positions of blips
 	for (auto tc : mTargetComps)
 	{
@@ -137,7 +137,9 @@ void HUD::UpdateRadar(float deltaTime)
 			
 			// Rotate blipPos
 			blipPos = Vector2::Transform(blipPos, rotMat);
-			mBlips.emplace_back(blipPos);
+			icon.mPosition = blipPos;
+			icon.mTexture = mBlipTex;
+			mBlips.emplace_back(icon);
 		}
 	}
 }
