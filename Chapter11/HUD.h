@@ -39,6 +39,9 @@ protected:
 	class Texture* mHighBlipTex;
 	class Texture* mLowBlipTex;
 	class Texture* mRadarArrow;
+	class Texture* mTargetArrow;
+	float mAngle;
+	Vector2 mArrowPos;
 	
 	// All the target components in the game
 	std::vector<class TargetComponent*> mTargetComps;

@@ -174,6 +174,25 @@ void UIScreen::DrawTexture(class Shader* shader, class Texture* texture,
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
+void UIScreen::DrawTexture2(Shader * shader, Texture * texture, const Vector2 & offset, float scale, float angle)
+{// Scale the quad by the width/height of texture
+	Matrix4 scaleMat = Matrix4::CreateScale(
+		static_cast<float>(texture->GetWidth()) * scale,
+		static_cast<float>(texture->GetHeight()) * scale,
+		1.0f);
+	// Translate to position on screen
+	Matrix4 transMat = Matrix4::CreateTranslation(
+		Vector3(offset.x, offset.y, 0.0f));
+	Matrix4 rotationMat = Matrix4::CreateRotationZ(angle);
+	// Set world transform
+	Matrix4 world = scaleMat * rotationMat * transMat;
+	shader->SetMatrixUniform("uWorldTransform", world);
+	// Set current texture
+	texture->SetActive();
+	// Draw quad
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
 void UIScreen::SetRelativeMouseMode(bool relative)
 {
 	if (relative)

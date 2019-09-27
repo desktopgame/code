@@ -75,6 +75,9 @@ protected:
 	void DrawTexture(class Shader* shader, class Texture* texture,
 					 const Vector2& offset = Vector2::Zero,
 					 float scale = 1.0f);
+	void DrawTexture2(class Shader* shader, class Texture* texture,
+		const Vector2& offset = Vector2::Zero,
+		float scale = 1.0f, float angle = 0.0f);
 	// Sets the mouse mode to relative or not
 	void SetRelativeMouseMode(bool relative);
 	class Game* mGame;

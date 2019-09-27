@@ -31,6 +31,7 @@ HUD::HUD(Game* game)
 	mHighBlipTex = r->GetTexture("Assets/BlipUp.png");
 	mLowBlipTex = r->GetTexture("Assets/BlipDown.png");
 	mRadarArrow = r->GetTexture("Assets/RadarArrow.png");
+	mTargetArrow = r->GetTexture("Assets/Arrow.png");
 }
 
 HUD::~HUD()
@@ -61,6 +62,7 @@ void HUD::Draw(Shader* shader)
 	}
 	// Radar arrow
 	DrawTexture(shader, mRadarArrow, cRadarPos);
+	DrawTexture2(shader, mTargetArrow, mArrowPos, 1.0f, mAngle);
 	
 	//// Health bar
 	//DrawTexture(shader, mHealthBar, Vector2(-350.0f, -350.0f));
@@ -114,6 +116,13 @@ void HUD::UpdateRadar(float deltaTime)
 	// Ditto for player forward
 	Vector3 playerForward = mGame->GetPlayer()->GetForward();
 	Vector2 playerForward2D(playerForward.x, playerForward.y);
+
+	Vector3 arrowTargetPos = mGame->GetArrowTarget()->GetPosition();
+	Vector2 arrowTargetPos2D(arrowTargetPos.y, arrowTargetPos.x);
+	Vector2 dirToArrow = playerPos2D - arrowTargetPos2D;
+	dirToArrow.Normalize();
+	this->mAngle = Math::Atan2(-dirToArrow.x, dirToArrow.y);
+	this->mArrowPos = Vector2();
 	
 	// Use atan2 to get rotation of radar
 	float angle = Math::Atan2(playerForward2D.y, playerForward2D.x);

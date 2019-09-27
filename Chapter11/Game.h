@@ -55,6 +55,7 @@ public:
 	void AddPlane(class PlaneActor* plane);
 	void RemovePlane(class PlaneActor* plane);
 	std::vector<class PlaneActor*>& GetPlanes() { return mPlanes; }
+	class Actor* GetArrowTarget() const { return mArrowTarget;  }
 private:
 	void ProcessInput();
 	void HandleKeyPress(int key);
@@ -87,6 +88,7 @@ private:
 	// Game-specific code
 	std::vector<class PlaneActor*> mPlanes;
 	class FPSActor* mFPSActor;
+	class Actor* mArrowTarget;
 	class SpriteComponent* mCrosshair;
 	SoundEvent mMusicEvent;
 	bool mGenActors;

@@ -35,6 +35,7 @@ Game::Game()
 ,mGameState(EGameplay)
 ,mUpdatingActors(false)
 ,mGenActors(false)
+,mArrowTarget(nullptr)
 {
 	
 }
@@ -393,6 +394,7 @@ void Game::GenActors()
 
 	// Different camera actors
 	mFPSActor = new FPSActor(this);
+	mArrowTarget = new Actor(this);
 
 	// Create target actors
 	a = new TargetActor(this);
