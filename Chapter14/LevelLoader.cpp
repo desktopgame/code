@@ -287,6 +287,17 @@ void LevelLoader::SaveActors(rapidjson::Document::AllocatorType& alloc,
 		rapidjson::Value props(rapidjson::kObjectType);
 		// Save properties
 		actor->SaveProperties(alloc, props);
+
+		// Check default value
+		if (actor->GetType() == Actor::TypeID::TTargetActor) {
+			TargetActor tempActor(game);
+			rapidjson::Value tempJson(rapidjson::kObjectType);
+			tempActor.SaveProperties(alloc, tempJson);
+			if (props == tempJson) {
+				props.Clear();
+			}
+		}
+
 		// Add the properties member
 		obj.AddMember("properties", props, alloc);
 
