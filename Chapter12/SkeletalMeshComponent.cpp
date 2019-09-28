@@ -65,6 +65,17 @@ void SkeletalMeshComponent::Update(float deltaTime)
 	}
 }
 
+Vector3 SkeletalMeshComponent::GetBonePosition(const std::string & name) const {
+	for (size_t i = 0; i < mSkeleton->GetNumBones(); i++) {
+		const Skeleton::Bone& bone = mSkeleton->GetBone(i);
+		if (bone.mName != name) {
+			continue;
+		}
+		return Vector3::Transform(Vector3::Zero, mPose[i]);
+	}
+	throw std::logic_error("invalid name: " + name);
+}
+
 float SkeletalMeshComponent::PlayAnimation(const Animation* anim, float playRate)
 {
 	mAnimation = anim;
@@ -83,6 +94,7 @@ void SkeletalMeshComponent::ComputeMatrixPalette()
 	const std::vector<Matrix4>& globalInvBindPoses = mSkeleton->GetGlobalInvBindPoses();
 	std::vector<Matrix4> currentPoses;
 	mAnimation->GetGlobalPoseAtTime(currentPoses, mSkeleton, mAnimTime);
+	this->mPose = currentPoses;
 
 	// Setup the palette for each bone
 	for (size_t i = 0; i < mSkeleton->GetNumBones(); i++)

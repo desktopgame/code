@@ -9,6 +9,7 @@
 #pragma once
 #include "MeshComponent.h"
 #include "MatrixPalette.h"
+#include <vector>
 
 class SkeletalMeshComponent : public MeshComponent
 {
@@ -22,6 +23,8 @@ public:
 	// Setters
 	void SetSkeleton(const class Skeleton* sk) { mSkeleton = sk; }
 
+	Vector3 GetBonePosition(const std::string& name) const;
+
 	// Play an animation. Returns the length of the animation
 	float PlayAnimation(const class Animation* anim, float playRate = 1.0f);
 protected:
@@ -32,4 +35,5 @@ protected:
 	const class Animation* mAnimation;
 	float mAnimPlayRate;
 	float mAnimTime;
+	std::vector<Matrix4> mPose;
 };
